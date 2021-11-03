@@ -11,6 +11,15 @@
 #include "libdmk.h"
 
 
+const char *
+mode2str(uint8_t mode)
+{
+	const char *modestr[] = {"FM", "MFM", "RX02", "M2FM"};
+
+	return modestr[mode];
+}
+
+
 void
 dump_sector_data(const uint8_t *data, size_t data_size)
 {
@@ -42,10 +51,10 @@ dump_track(struct dmk_state *dmkst, int side, int track)
 	uint8_t	*data = NULL;
 	int	ret = 1;
 
-	printf("Track %d, side %d:", track, side);
+	printf("Track %d, side %d", track, side);
 
 	if (!dmk_seek(dmkst, track, side)) {
-		printf(": [seek error]\n");
+		printf(": [seek error!]\n");
 		goto error;
 	}
 
@@ -53,16 +62,19 @@ dump_track(struct dmk_state *dmkst, int side, int track)
 	sector_info_t	si;
 
 	for (sector = 0;
+	     (sector < DMK_MAX_SECTOR) && dmk_read_id(dmkst, &si); ++sector);
+
+	printf(" (%d sectors):", sector);
+
+	if (!dmk_seek(dmkst, track, side)) {
+		printf(": [seek error!]\n");
+		goto error;
+	}
+
+	for (sector = 0;
 	     (sector < DMK_MAX_SECTOR) && dmk_read_id(dmkst, &si); ++sector) {
 
 		size_t	data_size = dmk_sector_size(&si);
-		printf("\n  cyl=%02x side=%02x sec=%02x size=%02x [%zu]\n",
-			si.cylinder, si.head, si.sector,
-			si.size_code, data_size);
-
-		//size_t	data_size = 256 << (si.size_code & 0x3);
-		//size_t	data_size = 1024;
-		//size_t	data_size = 128 << si.size_code;
 		data = malloc(data_size);
 
 		if (!data) {
@@ -71,7 +83,24 @@ dump_track(struct dmk_state *dmkst, int side, int track)
 			goto error;
 		}
 
-		if (dmk_read_sector(dmkst, &si, data)) {
+		uint16_t actual_crc = 0, computed_crc = 0;
+
+		if (dmk_read_sector_with_crcs(dmkst, &si, data,
+						&actual_crc, &computed_crc)) {
+			printf("\n  %s: cyl=%02x side=%02x sec=%02x "
+			       "size=%02x [%zu] / ",
+			        mode2str(si.mode),
+				si.cylinder, si.head, si.sector,
+				si.size_code, data_size);
+
+			if (actual_crc == computed_crc) {
+				printf("data crc=%04x\n", actual_crc);
+			} else {
+				printf("data "
+				       "crcs=%04x:%04x(!)\n",
+					actual_crc, computed_crc);
+			}
+
 			dump_sector_data(data, data_size);
 		} else {
 			printf("    Failed to read sector data.\n");
@@ -82,12 +111,13 @@ dump_track(struct dmk_state *dmkst, int side, int track)
 		data = NULL;
 	}
 
-	printf("    Sectors found: %d\n\n", sector);
+	printf("\n");
 	ret = 0;
 
 error:
 	if (data)
-		free (data);
+		free(data);
+
 	return ret;
 }
 
@@ -107,13 +137,10 @@ process_dmks(char **dmk_list)
 			return 2;
 		}
 
-		printf("%s: %d tracks [%s-sided/%s-density]\n",
+		printf("%s: %d tracks [%s-sided/%s-density]\n\n",
 			fn, tracks,
 			ds ? "double" : "single",
 			dd ? "double" : "single");
-
-		printf("0-%s%s-%dT\n",
-			ds ? "DS" : "SS", dd ? "DD" : "SD", tracks);
 	}
 
 	for (int s = 0; s <= ds; ++s) {
