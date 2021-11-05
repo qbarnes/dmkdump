@@ -46,7 +46,7 @@ dump_sector_data(const uint8_t *data, size_t data_size)
 
 
 int
-dump_track(struct dmk_state *dmkst, int side, int track)
+dump_track(struct dmk_state *dmkst, int track, int side)
 {
 	uint8_t	*data = NULL;
 	int	ret = 1;
@@ -143,9 +143,9 @@ process_dmks(char **dmk_list)
 			dd ? "double" : "single");
 	}
 
-	for (int s = 0; s <= ds; ++s) {
-		for (int t = 0; t < tracks; ++t)
-			dump_track(dmkst, s, t);
+	for (int t = 0; t < tracks; ++t) {
+		for (int s = 0; s <= ds; ++s)
+			dump_track(dmkst, t, s);
 	}
 
 	if (!dmk_close_image(dmkst)) {
