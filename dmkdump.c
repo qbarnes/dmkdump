@@ -78,7 +78,7 @@ dump_track(struct dmk_state *dmkst, int track, int side)
 		data = malloc(data_size);
 
 		if (!data) {
-			fprintf(stderr, "Failed to allocate %lu bytes for "
+			fprintf(stderr, "Failed to allocate %zu bytes for "
 				"sector buffer.\n", data_size);
 			goto error;
 		}
