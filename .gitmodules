@@ -1,7 +1,7 @@
 [submodule "dmklib"]
 	path = dmklib
 	url = git@github.com:qbarnes/dmklib
-	branch = next
+	branch = master
 [submodule "cwsdpmi"]
 	path = cwsdpmi
 	url = git@github.com:qbarnes/cwsdpmi
