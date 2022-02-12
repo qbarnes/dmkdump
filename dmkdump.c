@@ -71,9 +71,12 @@ dump_track(struct dmk_state *dmkst, int track, int side)
 		goto error;
 	}
 
-	for (sector = 0;
-	     (sector < DMK_MAX_SECTOR) && dmk_read_id(dmkst, &si); ++sector) {
+	uint16_t id_actual_crc, id_computed_crc;
+	uint16_t d_actual_crc, d_computed_crc;
+	int	 idr;
 
+	while ((idr = dmk_read_id_with_crcs(dmkst, &si,
+					&id_actual_crc, &id_computed_crc))) {
 		size_t	data_size = dmk_sector_size(&si);
 		data = malloc(data_size);
 
@@ -83,27 +86,31 @@ dump_track(struct dmk_state *dmkst, int track, int side)
 			goto error;
 		}
 
-		uint16_t actual_crc = 0, computed_crc = 0;
+		printf("\n  %s: cyl=%02x side=%02x sec=%02x "
+		       "size=%02x [%zu] / ",
+			mode2str(si.mode),
+			si.cylinder, si.head, si.sector,
+			si.size_code, data_size);
+
+		if (id_actual_crc == id_computed_crc) {
+			printf("ID crc=%04x", id_actual_crc);
+		} else {
+			printf("ID crcs=%04x:%04x(!)",
+				id_actual_crc, id_computed_crc);
+		}
 
 		if (dmk_read_sector_with_crcs(dmkst, &si, data,
-						&actual_crc, &computed_crc)) {
-			printf("\n  %s: cyl=%02x side=%02x sec=%02x "
-			       "size=%02x [%zu] / ",
-			        mode2str(si.mode),
-				si.cylinder, si.head, si.sector,
-				si.size_code, data_size);
-
-			if (actual_crc == computed_crc) {
-				printf("data crc=%04x\n", actual_crc);
+					&d_actual_crc, &d_computed_crc)) {
+			if (d_actual_crc == d_computed_crc) {
+				printf(" / data crc=%04x\n", d_actual_crc);
 			} else {
-				printf("data "
-				       "crcs=%04x:%04x(!)\n",
-					actual_crc, computed_crc);
+				printf(" / data crcs=%04x:%04x(!)\n",
+					d_actual_crc, d_computed_crc);
 			}
 
 			dump_sector_data(data, data_size);
 		} else {
-			printf("    Failed to read sector data.\n");
+			printf("\n    Failed to read sector data.\n");
 			fflush(stdout);
 		}
 
