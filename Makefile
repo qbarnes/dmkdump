@@ -60,6 +60,12 @@ $(TARBALLGZ): $(tar_files)
 		--transform='s:^cwsdpmi/bin/CWSDPMI.EXE:cwsdpmi.exe:' \
 		-f '$@' $^
 
+show_package:
+	@echo $(PRODUCT)
 
-.PHONY: all release clean clobber distclean FORCE
+show_version:
+	@echo $(VERSION)
+
+
+.PHONY: all release clean clobber distclean show_package show_version FORCE
 .DELETE_ON_ERROR:
