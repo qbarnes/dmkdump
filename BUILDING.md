@@ -1,7 +1,10 @@
 # Building Dmkdump
 
-There are two ways to build `dmkdump`, the usual way, which creates
-a native binary for the system you're running on, or cross-building.
+There are three ways to build `dmkdump`:
+
+   * [The usual way](#building-dmkdump-natively), which creates a native binary for the system you're running on,
+   * [Cross-building](#cross-building-dmkdump), or
+   * [Cross-building using OCI containers](#cross-building-dmkdump-using-oci-containers) (docker or podman).
 
 
 ## Building Dmkdump Natively
@@ -105,4 +108,43 @@ To exclude the ARM platforms when cross-building, run:
 
 ```
 $ make -f Makefile.cross BUILDS="LINUX_X86_64 MSDOS MSWIN32 MSWIN64"
+```
+
+
+## Cross-Building Dmkdump using OCI Containers
+
+Cross-building `dmkdump` with containers builds binaries for all six
+platforms like cross-building above, but does not require installing
+any additional software packages on your system beyond `git`,
+`make`, and OCI tools (`docker` or `podman`).  On Fedora, building
+with containers also allows ARM cross-builds.
+
+Cross-building with containers is only supported when running on
+x86_64 Linux.
+
+### Installing software
+
+On Fedora and RHEL-like distros, run:
+
+```
+$ sudo dnf install -y git make podman
+```
+
+On Debian, Ubuntu, and related distros, run:
+
+```
+$ sudo apt-get update
+$ sudo apt-get install -y git make docker
+```
+
+Then when cloning this repo, make sure to use the `--recursive` flag like so:
+
+```
+$ git clone --recursive git@github.com:qbarnes/dmkdump.git
+```
+
+### Using containers for building
+
+```
+$ make -f Makefile.oci
 ```
