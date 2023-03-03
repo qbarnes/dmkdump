@@ -26,7 +26,8 @@ oci_MSWIN64       = $(oci_mswindows)
 
 
 container_cmd_defaults = podman docker
-container_cmd_default_paths := $(shell command -v $(container_cmd_defaults))
+container_cmd_default_paths := \
+	$(shell bash -c "command -v $(container_cmd_defaults)")
 
 ifndef container_cmd
   container_cmd = $(firstword $(container_cmd_default_paths))
@@ -35,6 +36,8 @@ ifndef container_cmd
   endif
 endif
 
+
+all::
 
 %::
 	$(foreach v,$(BUILDS),\
