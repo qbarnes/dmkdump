@@ -3,7 +3,7 @@ include defines.mk product.mk
 
 BUILDS    ?= LINUX_X86_64 LINUX_ARMV7L LINUX_AARCH64 MSDOS MSWIN32 MSWIN64
 
-repo_dir  ?= /tmp/dmkdump
+repo_dir  ?= /tmp/$(PRODUCT)
 
 oci_base  ?= ghcr.io/qbarnes/containers-for-cross-compiling
 oci_tag   ?= latest
