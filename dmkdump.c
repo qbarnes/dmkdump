@@ -148,16 +148,16 @@ process_dmks(char **dmk_list)
 			fn, tracks,
 			ds ? "double" : "single",
 			dd ? "double" : "single");
-	}
 
-	for (int t = 0; t < tracks; ++t) {
-		for (int s = 0; s <= ds; ++s)
-			dump_track(dmkst, t, s);
-	}
+		for (int t = 0; t < tracks; ++t) {
+			for (int s = 0; s <= ds; ++s)
+				dump_track(dmkst, t, s);
+		}
 
-	if (!dmk_close_image(dmkst)) {
-		fprintf(stderr, "Close of '%s' failed.\n", fn);
-		return 1;
+		if (!dmk_close_image(dmkst)) {
+			fprintf(stderr, "Close of '%s' failed.\n", fn);
+			return 1;
+		}
 	}
 
 	return 0;
