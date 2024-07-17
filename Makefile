@@ -1,7 +1,7 @@
 include defines.mk product.mk
 
 CPPFLAGS = -I dmklib '-DVERSION="$(VERSION)"'
-CFLAGS = -Wall -Werror -Wfatal-errors
+CFLAGS = -O -g -Wall -Werror -Wfatal-errors
 
 ifndef top_dir
 top_dir		:= $(PWD)
