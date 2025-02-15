@@ -48,7 +48,7 @@ jobs:
       package_name: ${{ steps.package_and_version.outputs.package_name }}
       package_version: ${{ steps.package_and_version.outputs.package_version }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
 
@@ -73,6 +73,8 @@ jobs:
         platform: [linux_x86_64, linux_armv7l, linux_aarch64, msdos, mswin32, mswin64]
         include:
           - platform: linux_x86_64
+            # Use container crossbuild-aarch64 for native tools for building.
+            container: ${{ inputs.container_base }}/ubuntu-20.04-crossbuild-aarch64
             target_platform_name: linux
             target_platform: LINUX_X86_64
             target_arch: .x86_64
@@ -101,7 +103,7 @@ jobs:
     container:
       image: ${{ matrix.container }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
 
@@ -113,7 +115,7 @@ jobs:
           echo "build_artifacts_name=${package}-${version}-${target_platform_full_name}-build-artifacts" >> $GITHUB_OUTPUT
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.build_target.outputs.build_artifacts_name }}
           path: build.${{ env.target_platform_full_name }}/${{ env.package }}-${{ env.version }}-${{ env.target_platform_full_name }}.tar.gz
